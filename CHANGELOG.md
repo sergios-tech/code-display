@@ -9,9 +9,17 @@ All notable changes to this project are listed here. The format follows
 ### Added
 
 - **Context on every agent row**: each AGENTS row, and each agent row of the inline summary, now
-  reads its agent's context in `k` before the bar, `● 1: Count tests by file  Haiku  6k ▰▰▰▱▱▱`, dim.
+  reads its agent's context in `k` before the bar, `◼ 1: Count tests by file  Haiku  6k ▰▰▰▱▱▱`, dim.
   It is the same figure the opened agent reads as `ctx 6k`: the latest request's whole input, `0`
   until the first request. It keeps its place at every width, and the title gives up the four cells.
+
+### Changed
+
+- **Square agent glyphs**: an agent row's status glyph is now a square: `◼` while the agent runs,
+  `▣` once it is done and `◻` when it was stopped. `✗` still marks a failed agent or one cut at
+  `max_tokens`, and the colours stay. Before, a row read `●` running, `✓` done and `■` stopped. The
+  inline summary's agent rows and the desktop's time axis labels follow; the loops row keeps its
+  `●` `✓` `○`.
 
 ### Fixed
 
