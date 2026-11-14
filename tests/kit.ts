@@ -17,6 +17,7 @@ import {
 import type { Snapshot } from '../hooks/state/schema'
 import { cellsOf, layoutCells } from '../hooks/view/cells'
 import type { Draw } from '../hooks/view/draw'
+import type { Placement } from '../hooks/view/layout'
 import { buildViewModel } from '../hooks/view/model'
 import { COLORS } from '../hooks/view/palette'
 
@@ -29,7 +30,7 @@ export const engine = (on: On) => {
 }
 
 /** The mount spec of the dashboard pane at a body width; spread it and add the `surface`. */
-export const pane = (bodyColumns: number, placement: 'dock' | 'inline' = 'dock') => ({
+export const pane = (bodyColumns: number, placement: Placement = 'dock') => ({
   plugin: 'st-code-display',
   component: 'Pane' as const,
   requestId: 'st-code-display',
@@ -82,7 +83,7 @@ export const FRESH: Snapshot = {
   roster: DEFAULT_ROSTER,
   session: DEFAULT_SESSION,
 }
-export const vmOf = (s: Partial<Snapshot>, bodyColumns = 64, placement: 'dock' | 'inline' = 'dock', now = 0) =>
+export const vmOf = (s: Partial<Snapshot>, bodyColumns = 64, placement: Placement = 'dock', now = 0) =>
   buildViewModel({ ...FRESH, ...s }, { cfg: parseConfig({}), now, bodyColumns, placement, viewedAgentId: null })
 
 /** The props of every node of a type in a tree. */

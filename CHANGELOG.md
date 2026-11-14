@@ -23,6 +23,11 @@ All notable changes to this project are listed here. The format follows
 
 ### Fixed
 
+- **The desktop widget draws the summary**: a pane seated as a `widget`, the desktop app's small form
+  of a minimized pane, now draws the inline summary, which reads at a glance and takes no clicks. It
+  is no longer left padded to the dock's height. Before, the layout only knew `dock` and `inline`, so
+  a widget was drawn as if docked, in panels, and the plugin validator warned that the pane's
+  placement type has a third value.
 - **Token counts near a million**: a count from 999,500 to 999,999 now reads `1.0M`. Before, it read
   `1000k`, one character wider than any other count.
 

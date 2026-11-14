@@ -18,6 +18,7 @@ import {
 } from '../hooks/state/schema'
 import type { Snapshot } from '../hooks/state/schema'
 import { clampWidth, wideColumns } from '../hooks/view/layout'
+import type { Placement } from '../hooks/view/layout'
 import { buildViewModel } from '../hooks/view/model'
 import { COLORS } from '../hooks/view/palette'
 import { busy } from './fixture'
@@ -142,26 +143,26 @@ test('a loop that falls quiet without ending draws as idle once it no longer cou
   expect(await borders()).toEqual([COLORS.idle, COLORS.idle, COLORS.idle])
   await ui.unmount()
 })
-test('a busy session draws inside every width from 28 to 220, frames whole, docked and inline (Review Focus 1)', { timeoutMs: 30_000 }, async ($, on) => {
+test('a busy session draws inside every width from 28 to 220, frames whole, docked, inline and in a widget (Review Focus 1)', { timeoutMs: 30_000 }, async ($, on) => {
   engine(on)
   const s = busy()
   // The test's `$` has no `state` noun to write through, so the busy session is what every read of the plugin's state answers.
   const { turn: _t, view: _v, roster: _r, ...seed } = s
   on('state.get', (_$, e) => ({ value: { value: (seed as Record<string, unknown>)[e.key], version: 1 } }) as never)
-  for (const placement of ['dock', 'inline'] as const) for (let cols = 28; cols <= 220; cols++) {
+  for (const placement of ['dock', 'inline', 'widget'] as const) for (let cols = 28; cols <= 220; cols++) {
     const ui = await $.ui.mount({ ...pane(cols, placement), surface: 'terminal' })
     const rows = await rowsOf(ui)
     for (const r of rows) expect(cellWidth(r) <= clampWidth(cols)).toBe(true)
     // A row that starts with a side border ends with one, or with the closing edge of a second frame beside it that ends on that row.
     for (const r of rows.filter(x => /^[│├]/.test(x.trimStart()))) expect(/[│┤]$|└─*┘$/.test(r.trimEnd())).toBe(true)
-    if (placement === 'inline') expect(rows.length <= 8).toBe(true)
+    if (placement !== 'dock') expect(rows.length <= 8).toBe(true)
     await ui.unmount()
   }
 })
-test('docked, the black fill covers every body row; inline, the frame fits the tree', async ($, on) => {
+test('docked, the black fill covers every body row; inline and in a widget, the frame fits the tree', async ($, on) => {
   engine(on)
   on('ui.open', () => ({ value: { isPlaced: true } }) as never)
-  const fillOf = async (placement: 'dock' | 'inline', layout?: string) => {
+  const fillOf = async (placement: Placement, layout?: string) => {
     if (layout) await $.command.run({ command: 'st-code-display', args: `layout ${layout}` } as never)
     const ui = await $.ui.mount({ ...pane(120, placement), surface: 'terminal' })
     const root = (await ui.drawn()) as unknown as { props: Record<string, unknown> }
@@ -170,6 +171,7 @@ test('docked, the black fill covers every body row; inline, the frame fits the t
   }
   expect(await fillOf('dock')).toEqual([COLORS.fill, 70])
   expect(await fillOf('inline')).toEqual([COLORS.fill, undefined])
+  expect(await fillOf('widget')).toEqual([COLORS.fill, undefined])
   expect(await fillOf('dock', 'mini')).toEqual([COLORS.fill, 70])
 })
 test('inline, the pane is a summary of at most 8 rows', async ($, on) => {
@@ -202,6 +204,23 @@ test('inline, the pane is a summary of at most 8 rows', async ($, on) => {
     expect(rows.some(r => /[┌│└]/.test(r))).toBe(false); expect(await ui.find({ text: /LOG|INFO|SERGIO/ })).toBeUndefined()
     expect(rows.some(r => r.includes('⟲'))).toBe(false)
     await ui.unmount()
+  }
+})
+test('in a widget, the pane is the same summary as inline: no frames, no log, at most 8 rows', async ($, on) => {
+  const clock = engine(on)
+  on('agent.spawn', () => ({ model: 'claude-sonnet-5-5', agentId: 'w1' }))
+  await clock.advance(1000)
+  await $.agent.spawn(spawn('general-purpose', 'task one'))
+  for (const cols of [40, 64, 120]) {
+    const rows: string[][] = []
+    for (const placement of ['inline', 'widget'] as const) {
+      const ui = await $.ui.mount({ ...pane(cols, placement), surface: 'terminal' })
+      rows.push(await rowsOf(ui))
+      await ui.unmount()
+    }
+    expect(rows[1]).toEqual(rows[0])
+    expect(rows[1]!.length <= 8).toBe(true)
+    expect(rows[1]!.some(r => /[┌│└]/.test(r))).toBe(false)
   }
 })
 test('wide puts info and tools left, agents and architect right, and the log underneath', async ($, on) => {

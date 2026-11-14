@@ -11,6 +11,7 @@ import { effortLevel } from '../domain/vitals'
 import { kTokens, plural, prettyModel, wrapText } from '../format/text'
 import type { Snapshot } from '../state/schema'
 import { WIDE_LEFT, WIDE_RIGHT, clampWidth, pickLayout, wideColumns } from './layout'
+import type { Placement } from './layout'
 import { ROW_PX } from './picture'
 import { lanesHeight } from './svg'
 
@@ -191,7 +192,7 @@ export type ViewContext = {
   cfg: Config
   now: number
   bodyColumns: number
-  placement: 'dock' | 'inline'
+  placement: Placement
   viewedAgentId: string | null
   /**
    * Rows the pane body can show; the log takes what the other panels leave. Docked, that is all of
@@ -412,8 +413,8 @@ function toolsView(s: Snapshot, layout: ViewModel['layout']): ToolsView | null {
 /**
  * The newest lines that fit, those of the viewed agent alone while its transcript is open; null
  * when fewer than 2 rows are left. `used` is the rows the header and the other panels take; each
- * panel adds its own to it. Docked with a known height the body is padded to every row left; inline
- * or of unknown height it is the lines alone, at most 8.
+ * panel adds its own to it. Docked with a known height the body is padded to every row left; inline, in
+ * a widget or of unknown height it is the lines alone, at most 8.
  */
 function logView(lines: LogLine[], mainModel: string, startedAt: number | null, ctx: ViewContext, used: number): LogView | null {
   const isPadded = ctx.placement === 'dock' && ctx.bodyRows !== undefined && Number.isFinite(ctx.bodyRows)

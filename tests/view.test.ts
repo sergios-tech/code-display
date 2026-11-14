@@ -55,8 +55,9 @@ test('model families: Opus brand, Sonnet orange, Haiku green, Fable gold, any ot
 test('contrast runs from 1 (none) to 21 (white on black)', () => {
   expect(Math.round(contrast('#ffffff', '#000000') * 100) / 100).toBe(21); expect(contrast('#000', '#000000')).toBe(1)
 })
-test('layout picks mini inline, wide from 110 docked, compact otherwise; overrides win', () => {
-  expect(pickLayout('auto', null, 'inline', 120)).toBe('mini'); expect(pickLayout('auto', null, 'dock', 110)).toBe('wide')
+test('layout picks mini inline and in a widget, wide from 110 docked, compact otherwise; overrides win', () => {
+  expect(pickLayout('auto', null, 'inline', 120)).toBe('mini'); expect(pickLayout('auto', null, 'widget', 120)).toBe('mini')
+  expect(pickLayout('auto', 'compact', 'widget', 120)).toBe('compact'); expect(pickLayout('auto', null, 'dock', 110)).toBe('wide')
   expect(pickLayout('auto', null, 'dock', 109)).toBe('compact'); expect(pickLayout('auto', 'compact', 'dock', 200)).toBe('compact')
   expect(clampWidth(28)).toBe(40); expect(clampWidth(220)).toBe(220)
 })

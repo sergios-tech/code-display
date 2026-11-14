@@ -8,24 +8,31 @@ export const MIN_WIDTH = 40
 export const WIDE_FROM = 110
 const GAP = 2
 
+/**
+ * Where the host seated the pane: beside the transcript, above the prompt, or as the desktop app's
+ * small form of a minimized pane (`widget`, where clicks may not reach it).
+ */
+export type Placement = 'dock' | 'inline' | 'widget'
+
 export const clampWidth = (bodyColumns: number): number =>
   Number.isFinite(bodyColumns) ? Math.max(MIN_WIDTH, Math.floor(bodyColumns)) : MIN_WIDTH
 
 /**
  * The layout to draw: the `/st-code-display layout` choice, else the configured one, else `auto`, which is
- * the summary inline above the prompt and two columns from WIDE_FROM when docked. A forced `wide`
+ * the summary inline above the prompt or in a widget, which reads at a glance and takes no clicks,
+ * and two columns from WIDE_FROM when docked. A forced `wide`
  * too narrow for two MIN_WIDTH columns draws one column instead of panels squeezed below 40.
  */
 export const pickLayout = (
   cfg: Layout,
   override: Layout | null,
-  placement: 'dock' | 'inline',
+  placement: Placement,
   width: number,
 ): 'compact' | 'wide' | 'mini' => {
   const chosen = override ?? cfg
   if (chosen === 'wide') return width >= 2 * MIN_WIDTH + GAP ? 'wide' : 'compact'
   if (chosen !== 'auto') return chosen
-  if (placement === 'inline') return 'mini'
+  if (placement === 'inline' || placement === 'widget') return 'mini'
   return width >= WIDE_FROM ? 'wide' : 'compact'
 }
 
