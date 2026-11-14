@@ -1,5 +1,5 @@
 // The inline summary above the prompt: at most eight frameless rows on the black fill. The main
-// model's state and a digest of INFO's figures first, then up to six agents with their bars and
+// model's state and a digest of INFO's figures first, then up to six agents with their context, bars and
 // clocks, and a last row for the agents left out and the other loops.
 import type { RenderElement } from 'claude-code'
 
@@ -11,7 +11,7 @@ import type { Draw } from './draw'
 import { stateDot } from './header'
 import type { MiniView } from './model'
 import { ctxColor, familyColor, limitColor } from './palette'
-import { LOOP_GLYPH, bar, loopTone } from './panels/agents'
+import { CTX_CELLS, LOOP_GLYPH, bar, ctxFigure, loopTone } from './panels/agents'
 import { agentTone } from './svg'
 
 type Piece = { text: string; color: string; bold?: boolean }
@@ -114,13 +114,15 @@ const headRow = (d: Draw, m: MiniView, width: number): RenderElement => {
   )
 }
 
-/** `● Count tests by file    Haiku    ▰▰▰▱▱▱▱▱▱▱▱▱▱▱  0:37`: the AGENTS row without its hotkey digit, the mini taking no keys. */
+/** `● Count tests by file    Haiku     6k ▰▰▰▱▱▱▱▱▱▱▱▱▱▱  0:37`: the AGENTS row without its hotkey digit, the mini taking no keys. */
 const agentRow = (d: Draw, c: AgentCard, m: MiniView, width: number): RenderElement => {
   const { Box, Text } = d.els
   const { C } = d
   const hasTag = width >= TAG_FROM
   const barCells = width >= BAR_WIDE_FROM ? 14 : hasTag ? 10 : 6
-  const titleCells = Math.max(1, width - GLYPH_CELLS - (hasTag ? TAG_CELLS : 0) - 1 - barCells - CLOCK_CELLS)
+  // A title can fill its column, so with no tag after it the context takes one more cell to keep a space before `120k`.
+  const ctxCells = CTX_CELLS + (hasTag ? 0 : 1)
+  const titleCells = Math.max(1, width - GLYPH_CELLS - (hasTag ? TAG_CELLS : 0) - ctxCells - 1 - barCells - CLOCK_CELLS)
   const tag = hasTag ? modelTag(c, m.mainModel) : ''
   return (
     <Box key={`mini-agent-${c.id}`} width={width}>
@@ -131,6 +133,7 @@ const agentRow = (d: Draw, c: AgentCard, m: MiniView, width: number): RenderElem
         {pad(fitCells(cardTitle(c), titleCells), titleCells)}
       </Text>
       {hasTag ? <Text color={tag ? familyColor(tag) : C.dim}>{pad(fitCells(tag, TAG_CELLS - 1), TAG_CELLS)}</Text> : null}
+      {ctxFigure(d, c, ctxCells)}
       <Text>{' '}</Text>
       {bar(d, c, barCells)}
       <Box width={CLOCK_CELLS} flexShrink={0} justifyContent="flex-end">

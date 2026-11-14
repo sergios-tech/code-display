@@ -1,5 +1,6 @@
 import { expect, test } from 'claude-code/testing'
 
+import { cellCount } from '../hooks/domain/agents'
 import { normalizeCard } from '../hooks/state/schema'
 import type { Snapshot } from '../hooks/state/schema'
 import { miniPane } from '../hooks/view/mini'
@@ -11,7 +12,7 @@ const mini = (s: Snapshot, w: number) => drawRows(miniPane(draw({ now: NOW, moti
 test('the mini is state and digest, the agents and a last row', () => {
   const rows = mini(busy(), 100)
   expect(rows[0]).toBe('● OPUS 5.5 WORKING · ARCHITECT ON CALL   ◆ xhigh   ◐ ▰▱▱▱▱▱▱▱ 11% ↺ 1   7d ▰▰▰▰▰▱ 84%   $ 0.94')
-  expect(rows[1]).toBe(`● ${'Count tests by file'.padEnd(69)}${'Haiku'.padEnd(8)} ▰▰▰▱▱▱▱▱▱▱▱▱▱▱  0:37`)
+  expect(rows[1]).toBe(`● ${'Count tests by file'.padEnd(65)}${'Haiku'.padEnd(8)}${'6k'.padStart(4)} ▰▰▰▱▱▱▱▱▱▱▱▱▱▱  0:37`)
   expect(rows.slice(1, 6).map(r => r.slice(0, 2))).toEqual(['● ', '● ', '✗ ', '✓ ', '✓ '])
   expect(rows[6]).toBe('loops 2 seen · 1 active  ✓●'); expect(rows).toHaveLength(7)
 })
@@ -26,6 +27,17 @@ test('agent rows carry no digits or Buttons; tags go under 50 columns; bars are 
   expect(found(tree, 'Button')).toEqual([])
   expect(mini(busy(), 50)[1]).toContain('Haiku'); expect(mini(busy(), 49)[1]).not.toContain('Haiku')
   expect(mini(busy(), 70)[4]).toContain(' ' + '▰'.repeat(14)); expect(mini(busy(), 69)[4]).toContain(' ' + '▰'.repeat(10) + ' '); expect(mini(busy(), 49)[4]).toContain(' ' + '▰'.repeat(6) + ' ')
+})
+test("each agent row carries its context, dim, before the bar, with a space before it under a full title", () => {
+  const s = busy()
+  const big = { ...s, agents: [...s.agents, normalizeCard({ id: 'b', description: 'x'.repeat(120), status: 'running', spawnedAt: NOW - 1000, ctx: 120_000 })] }
+  for (const w of [40, 49, 50, 64, 100]) {
+    const rows = mini(big, w).slice(1, 7)
+    expect(rows.map(r => / (\S+) [▰▱]+ /.exec(r)?.[1])).toEqual(['120k', '6k', '12k', '9k', '28k', '41k'])
+    for (const r of rows) expect(cellCount(r) <= w).toBe(true)
+  }
+  const tree = miniPane(draw({ now: NOW, motion: false, hasClient: false }), vmOf(big, 64, 'inline', NOW).mini!, 64)
+  expect(['120k', '41k'].map(f => texts(tree).find(t => t.text === f)?.color)).toEqual([COLORS.dim, COLORS.dim])
 })
 test('twelve agents still fit eight rows, with the rest counted', () => {
   const s = busy(); const many = Array.from({ length: 12 }, (_, i) => normalizeCard({ id: `m${i}`, description: `Agent ${i}`, status: 'done', spawnedAt: NOW - 9000, endedAt: NOW - 1000 }))

@@ -4,6 +4,20 @@ All notable changes to this project are listed here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- **Context on every agent row**: each AGENTS row, and each agent row of the inline summary, now
+  reads its agent's context in `k` before the bar, `● 1: Count tests by file  Haiku  6k ▰▰▰▱▱▱`, dim.
+  It is the same figure the opened agent reads as `ctx 6k`: the latest request's whole input, `0`
+  until the first request. It keeps its place at every width, and the title gives up the four cells.
+
+### Fixed
+
+- **Token counts near a million**: a count from 999,500 to 999,999 now reads `1.0M`. Before, it read
+  `1000k`, one character wider than any other count.
+
 ## [0.6.1] - 2026-10-25
 
 ### Changed

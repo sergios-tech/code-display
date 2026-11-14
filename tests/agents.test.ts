@@ -166,12 +166,25 @@ const agents = (s: Snapshot, w: number, o: Partial<Draw> = {}) =>
 test('AGENTS is one row per agent, running first, with counts in the meta', () => {
   expect(agents(busy(), 66).slice(0, 6)).toEqual([
     '┌ AGENTS ─────────────────────────────────── 2 running · 5 total ┐',
-    '│ ● 1: Count tests by file          Haiku   ▰▰▰▱▱▱▱▱▱▱▱▱▱▱  0:37 │',
-    '│ ● 2: Check versions                       ▰▰▰▱▱▱▱▱▱▱▱▱▱▱  0:59 │',
-    '│ ✗ 3: List pane structure          Fable   ▰▰▰▰▰▰▰▰▰▰▰▰▰▰  0:10 │',
-    '│ ✓ 4: Review README claims         Sonnet  ▰▰▰▰▰▰▰▰▰▰▰▰▰▰  0:11 │',
-    '│ ✓ 5: Map hooks to events          Haiku   ▰▰▰▰▰▰▰▰▰▰▰▰▰▰  0:15 │',
+    '│ ● 1: Count tests by file      Haiku    6k ▰▰▰▱▱▱▱▱▱▱▱▱▱▱  0:37 │',
+    '│ ● 2: Check versions                   12k ▰▰▰▱▱▱▱▱▱▱▱▱▱▱  0:59 │',
+    '│ ✗ 3: List pane structure      Fable    9k ▰▰▰▰▰▰▰▰▰▰▰▰▰▰  0:10 │',
+    '│ ✓ 4: Review README claims     Sonnet  28k ▰▰▰▰▰▰▰▰▰▰▰▰▰▰  0:11 │',
+    '│ ✓ 5: Map hooks to events      Haiku   41k ▰▰▰▰▰▰▰▰▰▰▰▰▰▰  0:15 │',
   ])
+})
+test("every row carries its agent's context in k, dim, before the bar, at 40, 64 and 120 columns", () => {
+  const s = busy()
+  const big = { ...s, agents: [...s.agents, normalizeCard({ id: 'b', description: 'x'.repeat(80), status: 'running', spawnedAt: NOW - 1000, ctx: 999_600 })] }
+  for (const w of [40, 64, 120]) {
+    const rows = agents(big, w).filter(r => /^│ [●✓✗■] \d:/.test(r))
+    expect(rows.map(r => / (\S+) [▰▱]+ /.exec(r)?.[1])).toEqual(['1.0M', '6k', '12k', '9k', '28k', '41k'])
+    for (const r of rows) expect(cellWidth(r)).toBe(w)
+    // A title cut to its column still keeps a space before the figure.
+    expect(rows[0]).toMatch(/x… +1\.0M [▰▱]+ /)
+  }
+  const tree = agentsPanel(draw({ now: NOW, hasClient: false, motion: false }), vmOf(big, 64, 'dock', NOW).agents!, 64, () => () => undefined)
+  expect(['1.0M', '6k', '41k'].map(f => texts(tree).find(t => t.text === f)?.color)).toEqual([COLORS.dim, COLORS.dim, COLORS.dim])
 })
 test('the tag goes under 50 inside cells and the bar narrows to 10, then 6', () => {
   const at = (w: number) => agents(busy(), w)[1] ?? ''
@@ -205,8 +218,8 @@ test('a digit or a click opens an agent under the frame, and again closes it', a
   expect(await ui.find({ text: /2 running · 2 total/ })).toBeDefined()
   // Newest first: the second spawn takes digit 1. Its tag is blank (the main model), the first agent's reads Sonnet.
   const rows = await rowsOf(ui)
-  expect(rows.some(r => /^│ ● 1: Map the call sites +▰▰▰/.test(r))).toBe(true)
-  expect(rows.some(r => /^│ ● 2: Write the parser tests +Sonnet +▰▰▰/.test(r))).toBe(true)
+  expect(rows.some(r => /^│ ● 1: Map the call sites +0 ▰▰▰/.test(r))).toBe(true)
+  expect(rows.some(r => /^│ ● 2: Write the parser tests +Sonnet +0 ▰▰▰/.test(r))).toBe(true)
   expect((await ui.find({ key: 'key-ag2' }))?.props.hotkey).toBe('1'); expect((await ui.find({ key: 'key-ag1' }))?.props.hotkey).toBe('2')
   expect((await ui.find({ key: 'card-ag2' }))?.props.hotkey).toBeUndefined()
   expect(await ui.find({ type: 'Text', text: /^Map the call sites$/ })).toBeUndefined()

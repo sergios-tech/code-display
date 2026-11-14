@@ -1,12 +1,12 @@
 // The AGENTS panel: one row per agent, running first, each with a status glyph, its hotkey digit and
-// title, its model tag, a status bar and a clock. The agent a hotkey opened shows its details inside
+// title, its model tag, its context, a status bar and a clock. The agent a hotkey opened shows its details inside
 // the frame after a divider, then the loops row: the model loops no agent claims, after another
 // divider. The surfaces that draw pictures add the agents on one time axis as an SVG under it.
 import type { RenderElement } from 'claude-code'
 
 import type { AgentCard } from '../../../types'
 import { agentGlyph, cardTitle, fitCells, modelTag } from '../../domain/agents'
-import { plural } from '../../format/text'
+import { kTokens, plural } from '../../format/text'
 import { canAnimate, clientNode, clock } from '../draw'
 import type { Draw } from '../draw'
 import { dividerRow, frame } from '../frame'
@@ -32,6 +32,8 @@ const TAG_CELLS = 7
 const TAG_NAME_CELLS = 6
 /** The tag is dropped when the frame's inside is narrower than this. */
 const TAG_FROM = 50
+/** The agent's context, right-aligned: `0` to `999k`, then `1.0M`. Every row keeps it at every width. */
+export const CTX_CELLS = 4
 /** A clock, right-aligned: `m:ss` to `XhYY`. */
 const CLOCK_CELLS = 5
 /** The status bar is 14 cells from this inside width, 10 from the next, else 6. */
@@ -68,8 +70,18 @@ export const bar = (d: Draw, c: AgentCard, w: number): RenderElement[] => {
   ]
 }
 
+/** `41k`: the agent's context, its latest request's whole input, dim and right-aligned in `w` cells. */
+export const ctxFigure = (d: Draw, c: AgentCard, w: number): RenderElement => {
+  const { Box, Text } = d.els
+  return (
+    <Box key={`ctx-${c.id}`} width={w} flexShrink={0} justifyContent="flex-end">
+      <Text color={d.C.dim}>{kTokens(c.ctx)}</Text>
+    </Box>
+  )
+}
+
 /**
- * One row per agent, `● 1: title  Haiku  ▰▰▰▱▱▱▱▱▱▱▱▱▱▱  0:37`, and `+N earlier` above them; with none,
+ * One row per agent, `● 1: title  Haiku  41k ▰▰▰▱▱▱▱▱▱▱▱▱▱▱  0:37`, and `+N earlier` above them; with none,
  * `only loops running` while a loop no agent claims runs, else `no agents yet`.
  */
 const rows = (d: Draw, a: AgentsView, width: number, expand: Expand): RenderElement[] => {
@@ -86,8 +98,8 @@ const rows = (d: Draw, a: AgentsView, width: number, expand: Expand): RenderElem
   const hasTag = inside >= TAG_FROM
   const tagCells = hasTag ? TAG_CELLS : 0
   const barWidth = barCells(inside)
-  // What the glyph, the tag, the bar with a space either side and the clock leave for the digit and title.
-  const titleCells = Math.max(TITLE_MIN, inside - GLYPH_CELLS - NUMBER_CELLS - tagCells - (barWidth + 2) - CLOCK_CELLS)
+  // What the glyph, the tag, the context, the bar with a space either side and the clock leave for the digit and title.
+  const titleCells = Math.max(TITLE_MIN, inside - GLYPH_CELLS - NUMBER_CELLS - tagCells - CTX_CELLS - (barWidth + 2) - CLOCK_CELLS)
   const out: RenderElement[] = []
   if (a.earlier > 0) {
     out.push(
@@ -132,6 +144,7 @@ const rows = (d: Draw, a: AgentsView, width: number, expand: Expand): RenderElem
             <Text color={tag ? familyColor(tag) : C.dim}>{fitCells(tag, TAG_NAME_CELLS)}</Text>
           </Box>
         ) : null}
+        {ctxFigure(d, c, CTX_CELLS)}
         <Text>{' '}</Text>
         {bar(d, c, barWidth)}
         <Text>{' '}</Text>

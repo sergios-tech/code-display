@@ -35,6 +35,7 @@ test('shorten keeps one row whatever the input', () => {
 })
 test('numbers, money, durations and clocks', () => {
   expect(kTokens(950)).toBe('950'); expect(kTokens(102_400)).toBe('102k'); expect(kTokens(1_250_000)).toBe('1.3M')
+  expect([kTokens(999_499), kTokens(999_500), kTokens(999_999)]).toEqual(['999k', '1.0M', '1.0M'])
   expect(fmtUsd(3.123)).toBe('$3.12'); expect(fmtUsd(123.4)).toBe('$123')
   expect(fmtDuration(42_000)).toBe('42s'); expect(fmtDuration(102_000)).toBe('1m42s'); expect(fmtDuration(3_900_000)).toBe('1h05m')
   expect(fmtTimer(102_000)).toBe('1:42'); expect([fmtSession(42_000), fmtSession(724_000), fmtSession(3_724_000), fmtSession(-5)]).toEqual(['0:42', '12:04', '1:02:04', '0:00'])

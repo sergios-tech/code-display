@@ -37,8 +37,9 @@ export const shorten = (s: string, n: number): string => {
   return chars.length > n ? `${chars.slice(0, n - 1).join('').trimEnd()}…` : one
 }
 
+/** A token count in at most four characters below 10M: `950`, `102k`, `1.3M`; a count that rounds to 1000k reads `1.0M`. */
 export const kTokens = (n: number): string =>
-  n >= 1_000_000 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 1000 ? `${Math.round(n / 1000)}k` : String(n)
+  n >= 999_500 ? `${(n / 1_000_000).toFixed(1)}M` : n >= 1000 ? `${Math.round(n / 1000)}k` : String(n)
 
 const pad2 = (n: number) => String(n).padStart(2, '0')
 
