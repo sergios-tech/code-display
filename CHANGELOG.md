@@ -4,6 +4,16 @@ All notable changes to this project are listed here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.6.3] - 2026-11-16
+
+### Changed
+
+- **Agent glyphs by colour and fill**: an agent row now reads `□` in orange while the agent runs and
+  `■` in red once it is done, and `▪` in grey when it was stopped. `✗` still marks a failed agent or
+  one cut at `max_tokens`. A done agent's bar and its lane on the desktop's time axis turn red to
+  match, where they were green. Before, a row read `◼` running, `▣` done and `◻` stopped. The loops
+  row keeps its `●` `✓` `○`.
+
 ## [0.6.2] - 2026-11-14
 
 ### Added
