@@ -124,7 +124,7 @@ test('the glyph and tone read ✗ in error for a failed agent or an ended one cu
   expect(['running', 'done', 'failed', 'stopped'].map(s => agentGlyph(c(s as AgentCard['status'])))).toEqual(['□', '■', '✗', '▪'])
   expect([agentGlyph(c('done', 'max_tokens')), agentGlyph(c('stopped', 'max_tokens')), agentGlyph(c('running', 'max_tokens')), agentGlyph(c('done', 'end_turn'))]).toEqual(['✗', '✗', '□', '■'])
   expect([c('running'), c('done'), c('failed'), c('stopped'), c('done', 'max_tokens'), c('running', 'max_tokens')].map(agentTone))
-    .toEqual([COLORS.orange, COLORS.brand, COLORS.error, COLORS.dim, COLORS.error, COLORS.orange])
+    .toEqual([COLORS.green, COLORS.brand, COLORS.error, COLORS.dim, COLORS.error, COLORS.green])
 })
 test('the model tag is the family name only when it differs from the main model', () => {
   const m = (model: string) => normalizeCard({ id: 'x', model })
@@ -138,7 +138,7 @@ test('the SVG axis draws on OLED black in palette colours, its labels escaped', 
   expect(svg.startsWith('<svg')).toBe(true); expect(svg.endsWith('</svg>')).toBe(true)
   expect(svg).toContain(`<rect x="0" y="0" width="480" height="52" fill="${COLORS.fill}"/>`); expect(COLORS.fill).toBe('#000000')
   expect(svg).toContain('a &lt;b&gt; &amp; c'); expect(svg.includes('<b>')).toBe(false)
-  expect(svg).toContain(`fill="${COLORS.orange}"`); expect(svg).toContain(`fill="${COLORS.brand}"`)
+  expect(svg).toContain(`fill="${COLORS.green}"`); expect(svg).toContain(`fill="${COLORS.brand}"`)
   const palette: string[] = Object.values(COLORS)
   for (const m of svg.matchAll(/(?:fill|stroke)="([^"]+)"/g)) expect(palette.includes(m[1] ?? '')).toBe(true)
 })
@@ -388,9 +388,9 @@ test('spawns and ends are logged; max_tokens is flagged in error colour', async 
   reply.usage = { input_tokens: 1000, cache_read_input_tokens: 40_000, cache_creation_input_tokens: 0, output_tokens: 3000 }
   await step($, 'm1')
   const live = await $.ui.mount({ ...pane(100), surface: 'terminal' })
-  // Still running when a request hit max_tokens: it stays a steady orange □.
+  // Still running when a request hit max_tokens: it stays a steady green □.
   expect((await rowsOf(live)).some(r => /^│ □ 3: task one /.test(r))).toBe(true)
-  expect((await live.find({ type: 'Text', text: /^□$/ }))?.props.color).toBe(COLORS.orange)
+  expect((await live.find({ type: 'Text', text: /^□$/ }))?.props.color).toBe(COLORS.green)
   expect((await live.find({ type: 'Text', text: /^hit max_tokens$/ }))?.props.color).toBe(COLORS.text)
   // The cut line ends in the bold error mark, so its state never rests on colour alone.
   expect((await rowsOf(live)).some(r => /hit max_tokens ✗ *│$/.test(r))).toBe(true)

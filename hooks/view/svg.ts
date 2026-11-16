@@ -18,10 +18,10 @@ const MIN_PX = 240
 
 /**
  * An agent's colour on every surface: its row, bar and SVG bar. `error` when it failed or ended cut
- * at `max_tokens`, else `brand` red done, `dim` stopped and `orange` running. Always drawn beside its
+ * at `max_tokens`, else `brand` red done, `dim` stopped and `green` running. Always drawn beside its
  * status glyph, so the state is never told by colour alone.
  */
-export const agentTone = (c: AgentCard): string => (isCut(c) ? COLORS.error : c.status === 'done' ? COLORS.brand : c.status === 'stopped' ? COLORS.dim : COLORS.orange)
+export const agentTone = (c: AgentCard): string => (isCut(c) ? COLORS.error : c.status === 'done' ? COLORS.brand : c.status === 'stopped' ? COLORS.dim : COLORS.green)
 
 /** The axis's height in pixels for `n` agents: a lane for each of the newest SVG_LANES, and the padding above and below. */
 export const lanesHeight = (n: number): number => Math.min(n, SVG_LANES) * ROW_PX + 2 * PAD_PX
