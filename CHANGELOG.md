@@ -4,6 +4,14 @@ All notable changes to this project are listed here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.6.5] - 2026-11-16
+
+### Changed
+
+- **Agent context by size**: each agent's context figure on the AGENTS list, and on the inline
+  summary's agent rows, is now coloured by its size: green up to 200k tokens, orange above 200k and
+  red from 500k. Before, it was always dim.
+
 ## [0.6.4] - 2026-11-16
 
 ### Changed
