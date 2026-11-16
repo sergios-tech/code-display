@@ -4,6 +4,14 @@ All notable changes to this project are listed here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [0.6.4] - 2026-11-16
+
+### Changed
+
+- **Running agents are green**: a running agent's `□` and its bar, and its lane on the desktop's time
+  axis, are now green, where 0.6.3 drew them orange. A done agent stays `■` in red, a stopped one `▪`
+  in grey, and `✗` still marks a failed agent or one cut at `max_tokens`.
+
 ## [0.6.3] - 2026-11-16
 
 ### Changed
