@@ -21,10 +21,10 @@ const NOTE_MAX = 120
 export const LIST_SHOWN = 6
 
 /**
- * The state glyph beside every status, so a status is never told by colour alone: a filled square while
- * it runs, a filled-in box once done, an empty box when stopped before the end, and `✗` when it failed.
+ * The state glyph beside every status, so a status is never told by colour alone: an empty square while
+ * it runs, a full square once done, a small square when stopped before the end, and `✗` when it failed.
  */
-export const AGENT_GLYPH: Record<AgentStatus, string> = { running: '◼', done: '▣', failed: '✗', stopped: '◻' }
+export const AGENT_GLYPH: Record<AgentStatus, string> = { running: '□', done: '■', failed: '✗', stopped: '▪' }
 
 /** The agent failed, or ended after a request was cut at `max_tokens`. A running one is still just running. */
 export const isCut = (c: AgentCard): boolean => c.status === 'failed' || (c.status !== 'running' && c.lastStop === 'max_tokens')

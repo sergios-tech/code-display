@@ -121,10 +121,10 @@ test('the list shows running agents first, newest first, then the rest newest fi
 })
 test('the glyph and tone read ✗ in error for a failed agent or an ended one cut at max_tokens', () => {
   const c = (status: AgentCard['status'], lastStop: string | null = null) => normalizeCard({ id: 'x', status, lastStop })
-  expect(['running', 'done', 'failed', 'stopped'].map(s => agentGlyph(c(s as AgentCard['status'])))).toEqual(['◼', '▣', '✗', '◻'])
-  expect([agentGlyph(c('done', 'max_tokens')), agentGlyph(c('stopped', 'max_tokens')), agentGlyph(c('running', 'max_tokens')), agentGlyph(c('done', 'end_turn'))]).toEqual(['✗', '✗', '◼', '▣'])
+  expect(['running', 'done', 'failed', 'stopped'].map(s => agentGlyph(c(s as AgentCard['status'])))).toEqual(['□', '■', '✗', '▪'])
+  expect([agentGlyph(c('done', 'max_tokens')), agentGlyph(c('stopped', 'max_tokens')), agentGlyph(c('running', 'max_tokens')), agentGlyph(c('done', 'end_turn'))]).toEqual(['✗', '✗', '□', '■'])
   expect([c('running'), c('done'), c('failed'), c('stopped'), c('done', 'max_tokens'), c('running', 'max_tokens')].map(agentTone))
-    .toEqual([COLORS.orange, COLORS.green, COLORS.error, COLORS.dim, COLORS.error, COLORS.orange])
+    .toEqual([COLORS.orange, COLORS.brand, COLORS.error, COLORS.dim, COLORS.error, COLORS.orange])
 })
 test('the model tag is the family name only when it differs from the main model', () => {
   const m = (model: string) => normalizeCard({ id: 'x', model })
@@ -138,7 +138,7 @@ test('the SVG axis draws on OLED black in palette colours, its labels escaped', 
   expect(svg.startsWith('<svg')).toBe(true); expect(svg.endsWith('</svg>')).toBe(true)
   expect(svg).toContain(`<rect x="0" y="0" width="480" height="52" fill="${COLORS.fill}"/>`); expect(COLORS.fill).toBe('#000000')
   expect(svg).toContain('a &lt;b&gt; &amp; c'); expect(svg.includes('<b>')).toBe(false)
-  expect(svg).toContain(`fill="${COLORS.orange}"`); expect(svg).toContain(`fill="${COLORS.green}"`)
+  expect(svg).toContain(`fill="${COLORS.orange}"`); expect(svg).toContain(`fill="${COLORS.brand}"`)
   const palette: string[] = Object.values(COLORS)
   for (const m of svg.matchAll(/(?:fill|stroke)="([^"]+)"/g)) expect(palette.includes(m[1] ?? '')).toBe(true)
 })
@@ -166,18 +166,18 @@ const agents = (s: Snapshot, w: number, o: Partial<Draw> = {}) =>
 test('AGENTS is one row per agent, running first, with counts in the meta', () => {
   expect(agents(busy(), 66).slice(0, 6)).toEqual([
     '┌ AGENTS ─────────────────────────────────── 2 running · 5 total ┐',
-    '│ ◼ 1: Count tests by file      Haiku    6k ▰▰▰▱▱▱▱▱▱▱▱▱▱▱  0:37 │',
-    '│ ◼ 2: Check versions                   12k ▰▰▰▱▱▱▱▱▱▱▱▱▱▱  0:59 │',
+    '│ □ 1: Count tests by file      Haiku    6k ▰▰▰▱▱▱▱▱▱▱▱▱▱▱  0:37 │',
+    '│ □ 2: Check versions                   12k ▰▰▰▱▱▱▱▱▱▱▱▱▱▱  0:59 │',
     '│ ✗ 3: List pane structure      Fable    9k ▰▰▰▰▰▰▰▰▰▰▰▰▰▰  0:10 │',
-    '│ ▣ 4: Review README claims     Sonnet  28k ▰▰▰▰▰▰▰▰▰▰▰▰▰▰  0:11 │',
-    '│ ▣ 5: Map hooks to events      Haiku   41k ▰▰▰▰▰▰▰▰▰▰▰▰▰▰  0:15 │',
+    '│ ■ 4: Review README claims     Sonnet  28k ▰▰▰▰▰▰▰▰▰▰▰▰▰▰  0:11 │',
+    '│ ■ 5: Map hooks to events      Haiku   41k ▰▰▰▰▰▰▰▰▰▰▰▰▰▰  0:15 │',
   ])
 })
 test("every row carries its agent's context in k, dim, before the bar, at 40, 64 and 120 columns", () => {
   const s = busy()
   const big = { ...s, agents: [...s.agents, normalizeCard({ id: 'b', description: 'x'.repeat(80), status: 'running', spawnedAt: NOW - 1000, ctx: 999_600 })] }
   for (const w of [40, 64, 120]) {
-    const rows = agents(big, w).filter(r => /^│ [◼▣✗◻] \d:/.test(r))
+    const rows = agents(big, w).filter(r => /^│ [□■✗▪] \d:/.test(r))
     expect(rows.map(r => / (\S+) [▰▱]+ /.exec(r)?.[1])).toEqual(['1.0M', '6k', '12k', '9k', '28k', '41k'])
     for (const r of rows) expect(cellWidth(r)).toBe(w)
     // A title cut to its column still keeps a space before the figure.
@@ -194,7 +194,7 @@ test('the tag goes under 50 inside cells and the bar narrows to 10, then 6', () 
 test('more than six agents leave the oldest finished ones under +N earlier at the top', () => {
   const s = busy(); const extra = [0, 1, 2].map(i => normalizeCard({ id: `x${i}`, description: `Old ${i}`, status: 'done', spawnedAt: NOW - 300_000, endedAt: NOW - 290_000 }))
   const rows = agents({ ...s, agents: [...extra, ...s.agents] }, 66)
-  expect(rows[1]).toContain('+2 earlier'); expect(rows.filter(r => /│ [◼▣✗◻] \d:/.test(r))).toHaveLength(6)
+  expect(rows[1]).toContain('+2 earlier'); expect(rows.filter(r => /│ [□■✗▪] \d:/.test(r))).toHaveLength(6)
 })
 test('each hotkey sits on a hidden Button; the visible one has orange digits and no hotkey', () => {
   const tree = agentsPanel(draw({ now: NOW }), vmOf(busy(), 66, 'dock', NOW).agents!, 66, () => () => undefined)
@@ -218,8 +218,8 @@ test('a digit or a click opens an agent under the frame, and again closes it', a
   expect(await ui.find({ text: /2 running · 2 total/ })).toBeDefined()
   // Newest first: the second spawn takes digit 1. Its tag is blank (the main model), the first agent's reads Sonnet.
   const rows = await rowsOf(ui)
-  expect(rows.some(r => /^│ ◼ 1: Map the call sites +0 ▰▰▰/.test(r))).toBe(true)
-  expect(rows.some(r => /^│ ◼ 2: Write the parser tests +Sonnet +0 ▰▰▰/.test(r))).toBe(true)
+  expect(rows.some(r => /^│ □ 1: Map the call sites +0 ▰▰▰/.test(r))).toBe(true)
+  expect(rows.some(r => /^│ □ 2: Write the parser tests +Sonnet +0 ▰▰▰/.test(r))).toBe(true)
   expect((await ui.find({ key: 'key-ag2' }))?.props.hotkey).toBe('1'); expect((await ui.find({ key: 'key-ag1' }))?.props.hotkey).toBe('2')
   expect((await ui.find({ key: 'card-ag2' }))?.props.hotkey).toBeUndefined()
   expect(await ui.find({ type: 'Text', text: /^Map the call sites$/ })).toBeUndefined()
@@ -353,7 +353,7 @@ test('a description with newlines, emoji and a 300-char word stays one row per l
   for (const cols of [40, 64]) {
     const rows = await check(cols, 4)
     expect(rows.filter(r => r.includes('1: fix 🚀 the')).length).toBe(1)
-    expect(rows.filter(r => /^│ ◼ \d: fix 🚀 the x+…/.test(r))).toHaveLength(4)
+    expect(rows.filter(r => /^│ □ \d: fix 🚀 the x+…/.test(r))).toHaveLength(4)
   }
 })
 test('desktop draws the agents as an SVG axis on black', async ($, on) => {
@@ -388,9 +388,9 @@ test('spawns and ends are logged; max_tokens is flagged in error colour', async 
   reply.usage = { input_tokens: 1000, cache_read_input_tokens: 40_000, cache_creation_input_tokens: 0, output_tokens: 3000 }
   await step($, 'm1')
   const live = await $.ui.mount({ ...pane(100), surface: 'terminal' })
-  // Still running when a request hit max_tokens: it stays a steady orange ◼.
-  expect((await rowsOf(live)).some(r => /^│ ◼ 3: task one /.test(r))).toBe(true)
-  expect((await live.find({ type: 'Text', text: /^◼$/ }))?.props.color).toBe(COLORS.orange)
+  // Still running when a request hit max_tokens: it stays a steady orange □.
+  expect((await rowsOf(live)).some(r => /^│ □ 3: task one /.test(r))).toBe(true)
+  expect((await live.find({ type: 'Text', text: /^□$/ }))?.props.color).toBe(COLORS.orange)
   expect((await live.find({ type: 'Text', text: /^hit max_tokens$/ }))?.props.color).toBe(COLORS.text)
   // The cut line ends in the bold error mark, so its state never rests on colour alone.
   expect((await rowsOf(live)).some(r => /hit max_tokens ✗ *│$/.test(r))).toBe(true)
@@ -412,10 +412,10 @@ test('spawns and ends are logged; max_tokens is flagged in error colour', async 
   expect(await ui.find({ text: /0 running · 3 total/ })).toBeDefined()
   // Ended agents list newest first; the one cut at max_tokens reads ✗ although it answered.
   expect(all.some(r => /^│ ✗ 1: task three /.test(r))).toBe(true)
-  expect(all.some(r => /^│ ◻ 2: task two /.test(r))).toBe(true)
+  expect(all.some(r => /^│ ▪ 2: task two /.test(r))).toBe(true)
   expect(all.some(r => /^│ ✗ 3: task one /.test(r))).toBe(true)
   expect((await ui.find({ type: 'Text', text: /^✗$/ }))?.props.color).toBe(COLORS.error)
-  expect((await ui.find({ type: 'Text', text: /^◻$/ }))?.props.color).toBe(COLORS.dim)
+  expect((await ui.find({ type: 'Text', text: /^▪$/ }))?.props.color).toBe(COLORS.dim)
   await ui.unmount()
 })
 test("a subagent's answer is masked before it is stored or drawn in the open card", async ($, on) => {
@@ -443,7 +443,7 @@ test('the agent being viewed is marked ▶ before its title, and the log follows
   await $.agent.spawn(spawn('Explore', 'Look around'))
   const viewing = (cols: number) => $.ui.mount({ ...pane(cols), props: { ...pane(cols).props, view: { agentId: 'v1' } }, surface: 'terminal' })
   const wide = await viewing(64)
-  expect((await rowsOf(wide)).some(r => r.includes('◼ ▶ 1: Look around'))).toBe(true)
+  expect((await rowsOf(wide)).some(r => r.includes('□ ▶ 1: Look around'))).toBe(true)
   expect(await wide.find({ text: /LOG · THIS AGENT/ })).toBeDefined(); expect(await wide.find({ text: /main prompt/ })).toBeUndefined()
   expect(await wide.find({ text: /spawned · Explore/ })).toBeDefined()
   await wide.unmount()
@@ -451,7 +451,7 @@ test('the agent being viewed is marked ▶ before its title, and the log follows
   await $.agent.spawn(spawn('Explore', 'Look again'))
   const narrow = await viewing(40)
   const rows = await rowsOf(narrow)
-  expect(rows.some(r => r.includes('◼ ▶ 2: Look around'))).toBe(true); expect(rows.some(r => r.includes('▶ 1:'))).toBe(false)
+  expect(rows.some(r => r.includes('□ ▶ 2: Look around'))).toBe(true); expect(rows.some(r => r.includes('▶ 1:'))).toBe(false)
   for (const r of rows) expect(cellWidth(r) <= 40).toBe(true)
   await narrow.unmount()
 })

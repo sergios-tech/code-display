@@ -12,8 +12,8 @@ const mini = (s: Snapshot, w: number) => drawRows(miniPane(draw({ now: NOW, moti
 test('the mini is state and digest, the agents and a last row', () => {
   const rows = mini(busy(), 100)
   expect(rows[0]).toBe('● OPUS 5.5 WORKING · ARCHITECT ON CALL   ◆ xhigh   ◐ ▰▱▱▱▱▱▱▱ 11% ↺ 1   7d ▰▰▰▰▰▱ 84%   $ 0.94')
-  expect(rows[1]).toBe(`◼ ${'Count tests by file'.padEnd(65)}${'Haiku'.padEnd(8)}${'6k'.padStart(4)} ▰▰▰▱▱▱▱▱▱▱▱▱▱▱  0:37`)
-  expect(rows.slice(1, 6).map(r => r.slice(0, 2))).toEqual(['◼ ', '◼ ', '✗ ', '▣ ', '▣ '])
+  expect(rows[1]).toBe(`□ ${'Count tests by file'.padEnd(65)}${'Haiku'.padEnd(8)}${'6k'.padStart(4)} ▰▰▰▱▱▱▱▱▱▱▱▱▱▱  0:37`)
+  expect(rows.slice(1, 6).map(r => r.slice(0, 2))).toEqual(['□ ', '□ ', '✗ ', '■ ', '■ '])
   expect(rows[6]).toBe('loops 2 seen · 1 active  ✓●'); expect(rows).toHaveLength(7)
 })
 test('row one gives way: the cooler limit, the architect words, the gauges, effort, the hotter limit, then spend', () => {

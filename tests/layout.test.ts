@@ -198,7 +198,7 @@ test('inline, the pane is a summary of at most 8 rows', async ($, on) => {
     for (const r of rows) expect(cellWidth(r) <= cols).toBe(true)
     expect(rows[0]?.trimEnd()).toBe(cols >= 64 ? '● OPUS 5.5 IDLE   ◐ ▰▰▰▰▱▱▱▱ 51%   $ 3.12' : '● OPUS 5.5 IDLE   ◐ 51%  $ 3.12')
     // Running agents first, newest first; the finished one follows them.
-    expect(rows.slice(1, 7).map(r => r.slice(0, 12).trimEnd())).toEqual(['◼ task six', '◼ task five', '◼ task four', '◼ task three', '◼ task one', '▣ task two'])
+    expect(rows.slice(1, 7).map(r => r.slice(0, 12).trimEnd())).toEqual(['□ task six', '□ task five', '□ task four', '□ task three', '□ task one', '■ task two'])
     expect(rows[7]).toMatch(/^loops 1 seen · 1 active +● *$/)
     // No frames, no header bar and no log.
     expect(rows.some(r => /[┌│└]/.test(r))).toBe(false); expect(await ui.find({ text: /LOG|INFO|SERGIO/ })).toBeUndefined()
@@ -279,7 +279,7 @@ test('the wide layout holds AGENTS beside INFO from the start; a column the conf
   await $.agent.spawn(spawn('Explore', 'map the call sites'))
   const split = await $.ui.mount({ ...pane(130), surface: 'terminal' })
   const after = await rowsOf(split)
-  expect(after[top]?.indexOf('┌ AGENTS')).toBe(left + gap); expect(after[top + 1]?.slice(left + gap)).toMatch(/^│ ◼ 1: map the call sites/)
+  expect(after[top]?.indexOf('┌ AGENTS')).toBe(left + gap); expect(after[top + 1]?.slice(left + gap)).toMatch(/^│ □ 1: map the call sites/)
   for (const label of ['TOOLS & FILES', 'LOG']) expect(at(after, label)).toBe(at(before, label))
   await split.unmount()
 
