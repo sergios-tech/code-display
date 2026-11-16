@@ -60,6 +60,17 @@ export const to256 = (hex: string): string => {
 export const CTX_ORANGE = 30
 /** The context gauge turns red from this percent. */
 export const CTX_RED = 50
+/** An agent's context figure is green up to this many tokens and orange above it. */
+export const AGENT_CTX_ORANGE = 200_000
+/** An agent's context figure turns red (the error coral) from this many tokens. */
+export const AGENT_CTX_RED = 500_000
+
+/** An agent's context figure: green up to 200k, orange above it, red from 500k. A non-finite count counts as 0. */
+export const agentCtxColor = (tokens: number): string => {
+  const n = Number.isFinite(tokens) ? tokens : 0
+  return n >= AGENT_CTX_RED ? COLORS.error : n > AGENT_CTX_ORANGE ? COLORS.orange : COLORS.green
+}
+
 /** A rate-limit window turns orange from this percent. */
 export const LIMIT_ORANGE = 80
 /** A rate-limit window turns red from this percent. */

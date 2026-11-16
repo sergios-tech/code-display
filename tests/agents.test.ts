@@ -27,7 +27,7 @@ import { addAgent, finishAgent, loadSnapshot, noteAgentStep, noteArchitectType }
 import { DEFAULT_VIEW, normalizeCard } from '../hooks/state/schema'
 import type { Snapshot } from '../hooks/state/schema'
 import type { Draw } from '../hooks/view/draw'
-import { COLORS } from '../hooks/view/palette'
+import { COLORS, agentCtxColor } from '../hooks/view/palette'
 import { agentsPanel } from '../hooks/view/panels/agents'
 import { agentTone, svgLanes } from '../hooks/view/svg'
 import { NOW, busy, fake } from './fixture'
@@ -173,7 +173,7 @@ test('AGENTS is one row per agent, running first, with counts in the meta', () =
     '│ ■ 5: Map hooks to events      Haiku   41k ▰▰▰▰▰▰▰▰▰▰▰▰▰▰  0:15 │',
   ])
 })
-test("every row carries its agent's context in k, dim, before the bar, at 40, 64 and 120 columns", () => {
+test("every row carries its agent's context in k, coloured by size, before the bar, at 40, 64 and 120 columns", () => {
   const s = busy()
   const big = { ...s, agents: [...s.agents, normalizeCard({ id: 'b', description: 'x'.repeat(80), status: 'running', spawnedAt: NOW - 1000, ctx: 999_600 })] }
   for (const w of [40, 64, 120]) {
@@ -184,7 +184,11 @@ test("every row carries its agent's context in k, dim, before the bar, at 40, 64
     expect(rows[0]).toMatch(/x… +1\.0M [▰▱]+ /)
   }
   const tree = agentsPanel(draw({ now: NOW, hasClient: false, motion: false }), vmOf(big, 64, 'dock', NOW).agents!, 64, () => () => undefined)
-  expect(['1.0M', '6k', '41k'].map(f => texts(tree).find(t => t.text === f)?.color)).toEqual([COLORS.dim, COLORS.dim, COLORS.dim])
+  expect(['1.0M', '6k', '41k'].map(f => texts(tree).find(t => t.text === f)?.color)).toEqual([COLORS.error, COLORS.green, COLORS.green])
+})
+test("an agent's context reads green up to 200k, orange above it and red from 500k", () => {
+  expect([0, 199_999, 200_000, 200_001, 499_999, 500_000, 1_200_000, Number.NaN].map(agentCtxColor))
+    .toEqual([COLORS.green, COLORS.green, COLORS.green, COLORS.orange, COLORS.orange, COLORS.error, COLORS.error, COLORS.green])
 })
 test('the tag goes under 50 inside cells and the bar narrows to 10, then 6', () => {
   const at = (w: number) => agents(busy(), w)[1] ?? ''

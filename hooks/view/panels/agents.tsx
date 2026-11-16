@@ -12,7 +12,7 @@ import type { Draw } from '../draw'
 import { dividerRow, frame } from '../frame'
 import { loopsWords } from '../model'
 import type { AgentsView, ExpandedView, LoopsView } from '../model'
-import { familyColor } from '../palette'
+import { agentCtxColor, familyColor } from '../palette'
 import { CELL_PX } from '../picture'
 import { agentTone, svgLanes } from '../svg'
 
@@ -70,12 +70,12 @@ export const bar = (d: Draw, c: AgentCard, w: number): RenderElement[] => {
   ]
 }
 
-/** `41k`: the agent's context, its latest request's whole input, dim and right-aligned in `w` cells. */
+/** `41k`: the agent's context, its latest request's whole input, right-aligned in `w` cells: green up to 200k, orange above it, red from 500k. */
 export const ctxFigure = (d: Draw, c: AgentCard, w: number): RenderElement => {
   const { Box, Text } = d.els
   return (
     <Box key={`ctx-${c.id}`} width={w} flexShrink={0} justifyContent="flex-end">
-      <Text color={d.C.dim}>{kTokens(c.ctx)}</Text>
+      <Text color={agentCtxColor(c.ctx)}>{kTokens(c.ctx)}</Text>
     </Box>
   )
 }

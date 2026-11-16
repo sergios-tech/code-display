@@ -28,7 +28,7 @@ test('agent rows carry no digits or Buttons; tags go under 50 columns; bars are 
   expect(mini(busy(), 50)[1]).toContain('Haiku'); expect(mini(busy(), 49)[1]).not.toContain('Haiku')
   expect(mini(busy(), 70)[4]).toContain(' ' + '▰'.repeat(14)); expect(mini(busy(), 69)[4]).toContain(' ' + '▰'.repeat(10) + ' '); expect(mini(busy(), 49)[4]).toContain(' ' + '▰'.repeat(6) + ' ')
 })
-test("each agent row carries its context, dim, before the bar, with a space before it under a full title", () => {
+test("each agent row carries its context, coloured by size, before the bar, with a space before it under a full title", () => {
   const s = busy()
   const big = { ...s, agents: [...s.agents, normalizeCard({ id: 'b', description: 'x'.repeat(120), status: 'running', spawnedAt: NOW - 1000, ctx: 120_000 })] }
   for (const w of [40, 49, 50, 64, 100]) {
@@ -37,7 +37,7 @@ test("each agent row carries its context, dim, before the bar, with a space befo
     for (const r of rows) expect(cellCount(r) <= w).toBe(true)
   }
   const tree = miniPane(draw({ now: NOW, motion: false, hasClient: false }), vmOf(big, 64, 'inline', NOW).mini!, 64)
-  expect(['120k', '41k'].map(f => texts(tree).find(t => t.text === f)?.color)).toEqual([COLORS.dim, COLORS.dim])
+  expect(['120k', '41k'].map(f => texts(tree).find(t => t.text === f)?.color)).toEqual([COLORS.green, COLORS.green])
 })
 test('twelve agents still fit eight rows, with the rest counted', () => {
   const s = busy(); const many = Array.from({ length: 12 }, (_, i) => normalizeCard({ id: `m${i}`, description: `Agent ${i}`, status: 'done', spawnedAt: NOW - 9000, endedAt: NOW - 1000 }))
